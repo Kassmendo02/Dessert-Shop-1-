@@ -1,111 +1,118 @@
-# dessert.py
-
 from abc import ABC, abstractmethod
 
-
-# This is the main dessert item that others will inherit from
 class DessertItem(ABC):
-    def __init__(self, name: str = "", tax_percent: float = 7.25):
+    def __init__(self, name="", tax_percent=7.25):
         self.name = name
         self.tax_percent = tax_percent
 
     @abstractmethod
-    def calculate_cost(self) -> float:
-        """Return the cost of this dessert item."""
+    def calculate_cost(self):
         pass
 
-    def calculate_tax(self) -> float:
-        """Return the tax for this dessert item, rounded to 2 decimals."""
-        cost = self.calculate_cost()
-        tax = cost * (self.tax_percent / 100)
-        return round(tax, 2)
+    def calculate_tax(self):
+        return round(self.calculate_cost() * (self.tax_percent / 100), 2)
 
 
-# Candy is a type of DessertItem
 class Candy(DessertItem):
-    def __init__(self, name: str = "", candy_weight: float = 0.0, price_per_pound: float = 0.0):
-        # Call the parent (DessertItem) constructor to set the name
+    def __init__(self, name="", candy_weight=0.0, price_per_pound=0.0):
         super().__init__(name)
         self.candy_weight = candy_weight
         self.price_per_pound = price_per_pound
 
-    def calculate_cost(self) -> float:
-        cost = self.candy_weight * self.price_per_pound
-        return round(cost, 2)
+    def calculate_cost(self):
+        return round(self.candy_weight * self.price_per_pound, 2)
+
+    def __str__(self):
+        cost = self.calculate_cost()
+        tax = self.calculate_tax()
+        return (
+            f"{self.name}\n"
+            f"-    {self.candy_weight} lbs. @ ${self.price_per_pound}/lb:, "
+            f"${cost:.2f}, [Tax: ${tax:.2f}]"
+        )
 
 
-# Cookie is a type of DessertItem
 class Cookie(DessertItem):
-    def __init__(self, name: str = "", cookie_quantity: int = 0, price_per_dozen: float = 0.0):
+    def __init__(self, name="", cookie_quantity=0, price_per_dozen=0.0):
         super().__init__(name)
         self.cookie_quantity = cookie_quantity
         self.price_per_dozen = price_per_dozen
 
-    def calculate_cost(self) -> float:
+    def calculate_cost(self):
         dozens = self.cookie_quantity / 12
-        cost = dozens * self.price_per_dozen
-        return round(cost, 2)
+        return round(dozens * self.price_per_dozen, 2)
+
+    def __str__(self):
+        cost = self.calculate_cost()
+        tax = self.calculate_tax()
+        return (
+            f"{self.name} Cookies\n"
+            f"-    {self.cookie_quantity} cookies. @ ${self.price_per_dozen}/dozen:, "
+            f"${cost:.2f}, [Tax: ${tax:.2f}]"
+        )
 
 
-# IceCream is a type of DessertItem
 class IceCream(DessertItem):
-    def __init__(self, name: str = "", scoop_count: int = 0, price_per_scoop: float = 0.0):
+    def __init__(self, name="", scoop_count=0, price_per_scoop=0.0):
         super().__init__(name)
         self.scoop_count = scoop_count
         self.price_per_scoop = price_per_scoop
 
-    def calculate_cost(self) -> float:
-        cost = self.scoop_count * self.price_per_scoop
-        return round(cost, 2)
+    def calculate_cost(self):
+        return round(self.scoop_count * self.price_per_scoop, 2)
+
+    def __str__(self):
+        cost = self.calculate_cost()
+        tax = self.calculate_tax()
+        return (
+            f"{self.name} Ice Cream\n"
+            f"-    {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop:, "
+            f"${cost:.2f}, [Tax: ${tax:.2f}]"
+        )
 
 
-# Sundae is a type of IceCream with a topping
 class Sundae(IceCream):
-    def __init__(
-        self,
-        name: str = "",
-        scoop_count: int = 0,
-        price_per_scoop: float = 0.0,
-        topping_name: str = "",
-        topping_price: float = 0.0,
-    ):
-        # Initialize the IceCream part of the Sundae
+    def __init__(self, name="", scoop_count=0, price_per_scoop=0.0,
+                 topping_name="", topping_price=0.0):
         super().__init__(name, scoop_count, price_per_scoop)
-        # Then add the extra Sundae stuff
         self.topping_name = topping_name
         self.topping_price = topping_price
 
-    def calculate_cost(self) -> float:
-        ice_cream_cost = super().calculate_cost()
-        cost = ice_cream_cost + self.topping_price
-        return round(cost, 2)
+    def calculate_cost(self):
+        return round(
+            (self.scoop_count * self.price_per_scoop) + self.topping_price,
+            2
+        )
+
+    def __str__(self):
+        cost = self.calculate_cost()
+        tax = self.calculate_tax()
+        return (
+            f"{self.topping_name} {self.name} Sundae\n"
+            f"-    {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop\n"
+            f"-    {self.topping_name} topping @ ${self.topping_price}:, "
+            f"${cost:.2f}, [Tax: ${tax:.2f}]"
+        )
 
 
 class Order:
-    """A list-like container for DessertItem objects."""
-
     def __init__(self):
-        # list of DessertItem objects
         self.order = []
 
-    def add(self, item: DessertItem):
-        """Add a single DessertItem to the order."""
+    def add(self, item):
         self.order.append(item)
 
     def __len__(self):
-        """Return the number of items in the order."""
         return len(self.order)
 
-    def order_cost(self) -> float:
-        """Return total cost of all items in the order."""
-        total = 0.0
-        for item in self.order:
-            total += item.calculate_cost()
-        return round(total, 2)
+    def __str__(self):
+        return "\n".join(str(item) for item in self.order)
 
-    def order_tax(self) -> float:
-        """Return total tax of all items in the order."""
-        total_tax = 0.0
-        for item in self.order:
-            total_tax += item.calculate_tax()
-        return round(total_tax, 2)
+    def to_list(self):
+        return [line.split(",") for line in str(self).split("\n")]
+
+    def order_cost(self):
+        return round(sum(item.calculate_cost() for item in self.order), 2)
+
+    def order_tax(self):
+        return round(sum(item.calculate_tax() for item in self.order), 2)
