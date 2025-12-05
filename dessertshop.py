@@ -77,52 +77,41 @@ def main():
     shop = DessertShop()
     order = Order()
 
-    while True:
-        print("1: Candy")
-        print("2: Cookie")
-        print("3: Ice Cream")
-        print("4: Sundae")
-        print()
+    done: bool = False
 
-        choice = input("What would you like to add to the order? (1-4, Enter for done): ").strip()
+    prompt = '\n'.join([
+        '\n',
+        '1: Candy',
+        '2: Cookie',
+        '3: Ice Cream',
+        '4: Sundae',
+        '\nWhat would you like to add to the order? (1-4, Enter for done): '
+    ])
 
-        if choice == "":
-            break
+    while not done:
+        choice = input(prompt)
+        match choice:
+            case '':
+                done = True
+            case '1':
+                item = shop.user_prompt_candy()
+                order.add(item)
+                print(f"{item.name} has been added to your order.")
+            case '2':
+                item = shop.user_prompt_cookie()
+                order.add(item)
+                print(f"{item.name} has been added to your order.")
+            case '3':
+                item = shop.user_prompt_icecream()
+                order.add(item)
+                print(f"{item.name} has been added to your order.")
+            case '4':
+                item = shop.user_prompt_sundae()
+                order.add(item)
+                print(f"{item.name} has been added to your order.")
+            case _:
+                print("Invalid response: Please enter 1–4 or press Enter.")
 
-        if choice == "1":
-            order.add(shop.user_prompt_candy())
-        elif choice == "2":
-            order.add(shop.user_prompt_cookie())
-        elif choice == "3":
-            order.add(shop.user_prompt_icecream())
-        elif choice == "4":
-            order.add(shop.user_prompt_sundae())
-        else:
-            print("Invalid choice.")
-        print()
+    print()
+    print(tabulate(order.to_list(), tablefmt="fsql"))
 
-    # Build the receipt
-    data = []
-
-    for item in order.order:
-        cost = item.calculate_cost()
-        tax = item.calculate_tax()
-        data.append([item.name, f"${cost:.2f}", f"${tax:.2f}"])
-
-    subtotal = order.order_cost()
-    total_tax = order.order_tax()
-    total = subtotal + total_tax
-
-    if len(order) > 0:
-        data.append(["----------------", "--------", "--------"])
-        data.append(["Order Subtotals", f"${subtotal:.2f}", f"${total_tax:.2f}"])
-        data.append(["Order Total", f"${total:.2f}", ""])
-        data.append(["Total Items in the order:", len(order), ""])
-    else:
-        data.append(["(No items in order)", "", ""])
-
-    print(tabulate(data, headers=["Name", "Cost", "Tax"], tablefmt="fsql"))
-
-
-if __name__ == "__main__":
-    main()
