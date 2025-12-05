@@ -31,3 +31,8 @@ def test_candy_calculate_cost():
 def test_candy_calculate_tax():
     c = Candy("Candy Corn", 1.5, 0.25)
     assert c.calculate_tax() == 0.03
+
+
+def test_candy_packaging():
+    c = Candy("Candy Corn", 1.5, 0.25)
+    assert c.packaging == "Bag"
