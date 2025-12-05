@@ -31,3 +31,8 @@ def test_icecream_calculate_cost():
 def test_icecream_calculate_tax():
     ic = IceCream("Pistachio", 2, 0.79)
     assert ic.calculate_tax() == 0.11
+
+
+def test_icecream_packaging():
+    ic = IceCream("Pistachio", 2, 0.79)
+    assert ic.packaging == "Bowl"
