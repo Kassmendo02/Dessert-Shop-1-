@@ -32,3 +32,8 @@ def test_cookie_calculate_cost():
 def test_cookie_calculate_tax():
     ck = Cookie("Chocolate Chip", 6, 3.99)
     assert ck.calculate_tax() == 0.14
+
+
+def test_cookie_packaging():
+    ck = Cookie("Chocolate Chip", 6, 3.99)
+    assert ck.packaging == "Box"
