@@ -46,3 +46,23 @@ class Sundae(IceCream):
         # Then add the extra Sundae stuff
         self.topping_name = topping_name
         self.topping_price = topping_price
+
+# dessert.py
+
+# ... your existing DessertItem, Candy, Cookie, IceCream, Sundae classes ...
+
+
+class Order:
+    """A list-like container for DessertItem objects."""
+
+    def __init__(self):
+        # list of DessertItem objects
+        self.order = []
+
+    def add(self, item):
+        """Add a single DessertItem to the order."""
+        self.order.append(item)
+
+    def __len__(self):
+        """Return the number of items in the order."""
+        return len(self.order)
