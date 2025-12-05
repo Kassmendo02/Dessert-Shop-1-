@@ -36,3 +36,8 @@ def test_sundae_calculate_cost():
 def test_sundae_calculate_tax():
     s = Sundae("Vanilla", 3, 0.69, "Hot Fudge", 1.29)
     assert s.calculate_tax() == 0.24
+
+
+def test_sundae_packaging():
+    s = Sundae("Vanilla", 3, 0.69, "Hot Fudge", 1.29)
+    assert s.packaging == "Boat"
