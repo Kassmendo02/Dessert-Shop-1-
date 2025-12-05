@@ -3,6 +3,7 @@ from dessert import Candy, Cookie, IceCream, Sundae, Order
 
 
 class DessertShop:
+    # Simple student-style input with basic validation
 
     def user_prompt_candy(self):
         name = input("Enter name of candy: ")
@@ -73,7 +74,6 @@ class DessertShop:
 
 
 def main():
-
     shop = DessertShop()
     order = Order()
 
@@ -110,8 +110,13 @@ def main():
                 order.add(item)
                 print(f"{item.name} has been added to your order.")
             case _:
-                print("Invalid response: Please enter 1–4 or press Enter.")
+                print("Invalid response: Please enter a choice 1–4 or press Enter.")
+        print()
 
     print()
+    # Part 6 requirement: single line to print the receipt
     print(tabulate(order.to_list(), tablefmt="fsql"))
 
+
+if __name__ == "__main__":
+    main()
