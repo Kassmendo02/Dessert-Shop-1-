@@ -150,8 +150,11 @@ def main():
     payment_method = shop.get_payment_type()
     order.set_pay_type(payment_method)
 
-    # Print receipt (Part 6 requirement)
-    print(tabulate(order.to_list(), tablefmt="fsql"))
+  # Part 9 – Sort items before printing
+order.sort()
+
+# Print receipt
+print(tabulate(order.to_list(), tablefmt="fsql"))
 
 
 if __name__ == "__main__":
