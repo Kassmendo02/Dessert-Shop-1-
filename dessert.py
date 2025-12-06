@@ -3,18 +3,20 @@ from abc import ABC, abstractmethod
 from packaging import Packaging
 from functools import total_ordering
 from payment import PayType, Payable
+from combine import Combinable   # <<< PART 10 NEW IMPORT
 
 
-# ---------------------------------------------------
+# ---------------------------------------------------------
 # DessertItem base class with comparison operators
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 @total_ordering
 class DessertItem(ABC, Packaging):
 
     def __init__(self, name="", tax_percent=7.25):
         self.name = name
         self.tax_percent = tax_percent
-        self.packaging = None  # will be set in each subclass
+        self.packaging = None   # will be set in each subclass
 
     @abstractmethod
     def calculate_cost(self):
@@ -24,9 +26,7 @@ class DessertItem(ABC, Packaging):
         cost = self.calculate_cost()
         return round(cost * (self.tax_percent / 100), 2)
 
-    # ------------------------------
     # Part 9: Comparison Operators
-    # ------------------------------
     def __eq__(self, other):
         return self.calculate_cost() == other.calculate_cost()
 
@@ -34,9 +34,10 @@ class DessertItem(ABC, Packaging):
         return self.calculate_cost() < other.calculate_cost()
 
 
-# ---------------------------------------------------
+# ---------------------------------------------------------
 # Candy
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 class Candy(DessertItem):
 
     def __init__(self, name="", candy_weight=0.0, price_per_pound=0.0):
@@ -53,14 +54,32 @@ class Candy(DessertItem):
         tax = self.calculate_tax()
         return (
             f"{self.name} ({self.packaging})\n"
-            f"  {self.candy_weight} lbs. @ ${self.price_per_pound}/lb: "
+            f"-   {self.candy_weight} lbs. @ ${self.price_per_pound}/lb: "
             f"${cost:.2f}, [Tax: ${tax:.2f}]"
         )
 
+    # ---------------------------------------------------------
+    # PART 10: Combinable support for Candy
+    # ---------------------------------------------------------
+    def can_combine(self, other):
+        if not isinstance(other, Candy):
+            return False
+        return (
+            self.name == other.name and
+            self.price_per_pound == other.price_per_pound
+        )
 
-# ---------------------------------------------------
+    def combine(self, other):
+        if not isinstance(other, Candy):
+            raise TypeError("Can only combine Candy with Candy.")
+        self.candy_weight += other.candy_weight
+        return self
+
+
+# ---------------------------------------------------------
 # Cookie
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 class Cookie(DessertItem):
 
     def __init__(self, name="", cookie_quantity=0, price_per_dozen=0.0):
@@ -78,14 +97,33 @@ class Cookie(DessertItem):
         tax = self.calculate_tax()
         return (
             f"{self.name} Cookies ({self.packaging})\n"
-            f"  {self.cookie_quantity} cookies. @ ${self.price_per_dozen}/dozen: "
+            f"-   {self.cookie_quantity} cookies. @ "
+            f"${self.price_per_dozen}/dozen: "
             f"${cost:.2f}, [Tax: ${tax:.2f}]"
         )
 
+    # ---------------------------------------------------------
+    # PART 10: Combinable support for Cookie
+    # ---------------------------------------------------------
+    def can_combine(self, other):
+        if not isinstance(other, Cookie):
+            return False
+        return (
+            self.name == other.name and
+            self.price_per_dozen == other.price_per_dozen
+        )
 
-# ---------------------------------------------------
+    def combine(self, other):
+        if not isinstance(other, Cookie):
+            raise TypeError("Can only combine Cookie with Cookie.")
+        self.cookie_quantity += other.cookie_quantity
+        return self
+
+
+# ---------------------------------------------------------
 # Ice Cream
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 class IceCream(DessertItem):
 
     def __init__(self, name="", scoop_count=0, price_per_scoop=0.0):
@@ -102,14 +140,15 @@ class IceCream(DessertItem):
         tax = self.calculate_tax()
         return (
             f"{self.name} Ice Cream ({self.packaging})\n"
-            f"  {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop: "
+            f"-   {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop "
             f"${cost:.2f}, [Tax: ${tax:.2f}]"
         )
 
 
-# ---------------------------------------------------
+# ---------------------------------------------------------
 # Sundae
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 class Sundae(IceCream):
 
     def __init__(self, name="", scoop_count=0, price_per_scoop=0.0,
@@ -129,36 +168,61 @@ class Sundae(IceCream):
         tax = self.calculate_tax()
         return (
             f"{self.topping_name} {self.name} Sundae ({self.packaging})\n"
-            f"  {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop\n"
-            f"  {self.topping_name} topping @ ${self.topping_price}: "
+            f"-   {self.scoop_count} scoops. @ ${self.price_per_scoop}/scoop\n"
+            f"-   {self.topping_name} topping @ ${self.topping_price}: "
             f"${cost:.2f}, [Tax: ${tax:.2f}]"
         )
 
 
-# ---------------------------------------------------
+# ---------------------------------------------------------
 # Order Class
-# ---------------------------------------------------
+# ---------------------------------------------------------
+
 class Order(Payable):
 
     def __init__(self):
-        self.order = []              # list of DessertItem objects
+        self.order = []  # list of DessertItem objects
         self.pay_type: PayType = "CASH"
 
+    # Part 10: Add items with combining behavior
     def add(self, item):
-        self.order.append(item)
+        combined = False
+
+        for existing in self.order:
+            if isinstance(existing, Combinable) and isinstance(item, Combinable):
+                if existing.can_combine(item):
+                    existing.combine(item)
+                    combined = True
+                    break
+
+        if not combined:
+            self.order.append(item)
 
     def __len__(self):
         return len(self.order)
 
-    # --------------------------------------
     # Part 9: Sort desserts by ascending cost
-    # --------------------------------------
     def sort(self):
         self.order.sort()
 
-    # --------------------------------------
+    # ---------------------------------------------------------
+    # PART 10: Iterator support
+    # ---------------------------------------------------------
+    def __iter__(self):
+        self._index = 0
+        return self
+
+    def __next__(self):
+        if self._index < len(self.order):
+            item = self.order[self._index]
+            self._index += 1
+            return item
+        raise StopIteration
+
+    # ---------------------------------------------------------
     # Receipt Formatting
-    # --------------------------------------
+    # ---------------------------------------------------------
+
     def __str__(self):
         lines = []
 
@@ -181,7 +245,7 @@ class Order(Payable):
     def to_list(self):
         rows = []
         for line in str(self).split("\n"):
-            rows.append(line.split(","))
+            rows.append(line.split(":"))
         return rows
 
     # Order totals
@@ -191,9 +255,7 @@ class Order(Payable):
     def order_tax(self):
         return round(sum(item.calculate_tax() for item in self.order), 2)
 
-    # --------------------------------------
     # Payment Interface Methods
-    # --------------------------------------
     def get_pay_type(self) -> PayType:
         if self.pay_type not in ["CASH", "CARD", "PHONE"]:
             raise ValueError("Invalid payment type stored in Order.")
