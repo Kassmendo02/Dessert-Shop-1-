@@ -3,8 +3,9 @@ from dessert import Candy, Cookie, IceCream, Sundae, Order
 
 
 class DessertShop:
-    # Simple student-style input with basic validation
-
+    # -----------------------------------------
+    # User input functions for each dessert type
+    # -----------------------------------------
     def user_prompt_candy(self):
         name = input("Enter name of candy: ")
 
@@ -21,7 +22,7 @@ class DessertShop:
         return Candy(name, weight, price)
 
     def user_prompt_cookie(self):
-        name = input("Enter name of cookie: ")
+        name = input("Enter the name of cookie: ")
 
         qty = input("Enter the number of cookies: ")
         while not qty.isdigit():
@@ -72,51 +73,87 @@ class DessertShop:
 
         return Sundae(name, scoops, price, topping_name, topping_price)
 
+    # -----------------------------------------
+    # PART 8 — Ask user for Payment Type
+    # -----------------------------------------
+    def get_payment_type(self):
+        print("1: CASH")
+        print("2: CARD")
+        print("3: PHONE")
 
+        choice = input("Enter payment method): ")
+
+        mapping = {
+            "1": "CASH",
+            "2": "CARD",
+            "3": "PHONE"
+        }
+
+        if choice not in mapping:
+            raise ValueError("Invalid payment type entered.")
+
+        return mapping[choice]
+
+
+# -----------------------------------------
+# Main program flow
+# -----------------------------------------
 def main():
     shop = DessertShop()
     order = Order()
 
-    done: bool = False
+    done = False
 
-    prompt = '\n'.join([
-        '\n',
-        '1: Candy',
-        '2: Cookie',
-        '3: Ice Cream',
-        '4: Sundae',
-        '\nWhat would you like to add to the order? (1-4, Enter for done): '
+    prompt = "\n".join([
+        "\n1: Candy",
+        "2: Cookie",
+        "3: Ice Cream",
+        "4: Sundae",
+        "What would you like to add to the order? (1-4, Enter for done): "
     ])
 
     while not done:
         choice = input(prompt)
+
         match choice:
-            case '':
+            case "":
                 done = True
-            case '1':
+
+            case "1":
                 item = shop.user_prompt_candy()
                 order.add(item)
                 print(f"{item.name} has been added to your order.")
-            case '2':
+
+            case "2":
                 item = shop.user_prompt_cookie()
                 order.add(item)
                 print(f"{item.name} has been added to your order.")
-            case '3':
+
+            case "3":
                 item = shop.user_prompt_icecream()
                 order.add(item)
                 print(f"{item.name} has been added to your order.")
-            case '4':
+
+            case "4":
                 item = shop.user_prompt_sundae()
                 order.add(item)
                 print(f"{item.name} has been added to your order.")
+
             case _:
-                print("Invalid response: Please enter a choice 1–4 or press Enter.")
-        print()
+                print("Invalid response: Please enter 1–4 or press Enter.")
 
     print()
-    # Part 6 requirement: single line to print the receipt
+
+    # ---------------------------
+    # PART 8 — Set Payment Method
+    # ---------------------------
+    payment_method = shop.get_payment_type()
+    order.set_pay_type(payment_method)
+
+    # Print receipt (Part 6 requirement)
     print(tabulate(order.to_list(), tablefmt="fsql"))
 
 
 if __name__ == "__main__":
     main()
+
