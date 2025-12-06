@@ -39,10 +39,6 @@ def test_get_invalid_payment():
         o.get_pay_type()
 
 
-# --------------------------------------------------------
-# PART 9 — Test Order.sort() sorts by ascending cost
-# --------------------------------------------------------
-
 def test_order_sort():
     o = Order()
 
@@ -63,3 +59,30 @@ def test_order_sort():
     assert o.order[0] == cheap
     assert o.order[1] == mid
     assert o.order[2] == expensive
+
+
+def test_order_iterator():
+    o = Order()
+
+    # Add items in known order
+    c1 = Candy("A", 1, 1.00)
+    c2 = Candy("B", 2, 1.00)
+    c3 = Candy("C", 3, 1.00)
+
+    o.add(c1)
+    o.add(c2)
+    o.add(c3)
+
+    it = iter(o)
+
+    # Check each value returned in order
+    assert next(it) is c1
+    assert next(it) is c2
+    assert next(it) is c3
+
+    # After last element, StopIteration should be raised
+    try:
+        next(it)
+        assert False     # should NOT reach this line
+    except StopIteration:
+        assert True
