@@ -118,12 +118,13 @@ class Sundae(IceCream):
         )
 
 
-# ------------------------------
 # Order class
-# ------------------------------
-class Order:
+from payment import PayType, Payable
+
+class Order(Payable):
     def __init__(self):
-        self.order = []
+        self.order = []                # list of DessertItem objects
+        self.pay_type: PayType = "CASH"  # default payment type
 
     def add(self, item):
         self.order.append(item)
@@ -131,8 +132,13 @@ class Order:
     def __len__(self):
         return len(self.order)
 
+    # -------------------------
+    # Receipt formatting
+    # -------------------------
     def __str__(self):
         lines = []
+
+        # Print each dessert item using its __str__()
         for item in self.order:
             lines.append(str(item))
 
@@ -143,17 +149,37 @@ class Order:
         lines.append(f"Total number of items in order: {len(self.order)}")
         lines.append(f"Order Subtotals: ${subtotal:.2f}, [Tax: ${tax_total:.2f}]")
         lines.append(f"Order Total: ${total:.2f}")
+        lines.append("Paid with " + self.pay_type)
 
         return "\n".join(lines)
 
+    # -------------------------
+    # Convert to list method (unchanged)
+    # -------------------------
     def to_list(self):
         rows = []
         for line in str(self).split("\n"):
             rows.append(line.split(","))
         return rows
 
+    # -------------------------
+    # Order totals
+    # -------------------------
     def order_cost(self):
         return round(sum(item.calculate_cost() for item in self.order), 2)
 
     def order_tax(self):
         return round(sum(item.calculate_tax() for item in self.order), 2)
+
+    # -------------------------
+    # Payment interface methods (Part 8 requirement)
+    # -------------------------
+    def get_pay_type(self) -> PayType:
+        if self.pay_type not in ["CASH", "CARD", "PHONE"]:
+            raise ValueError("Invalid payment type stored in Order.")
+        return self.pay_type
+
+    def set_pay_type(self, payment_method: PayType) -> None:
+        if payment_method not in ["CASH", "CARD", "PHONE"]:
+            raise ValueError("Invalid payment type.")
+        self.pay_type = payment_method
